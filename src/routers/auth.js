@@ -18,8 +18,14 @@ authRouter.post("/user/signup",async(req,res)=>{
         const passwordHash=await bctrypt.hash(password,10)
 
         const user=new User({firstName, lastName, age, email, password:passwordHash,profileUrl,gender,skills})
-        await user.save()
-        res.send("user created successfully")
+        const savedUser = await user.save();
+        const token = await savedUser.getJWT();
+
+        res.cookie("token", token, {
+          expires: new Date(Date.now() + 8 * 3600000),
+        });
+
+        res.json({ message: "User Added successfully!", data: savedUser });
     }
     catch(err){
         res.status(400).send(err.message)
@@ -55,8 +61,8 @@ authRouter.post("/user/login",async(req,res)=>{
             });
 
 
-            // res.send("user logged in successfully")
-            res.send(user)
+            res.send("user logged in successfully")
+            // res.send(user)
 
         }
 

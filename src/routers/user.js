@@ -12,7 +12,8 @@ userRouter.get("/user/request/received",userAuth, async(req,res)=>{
           const connectionRequests=await ConnectionRequestModel.find({
             toUserId: loggedInUser._id,
             status: "interested"
-          }). populate('fromUserId', ["firstName","lastName"])
+          }). populate('fromUserId', "firstName lastName age gender about skills profileUrl")
+          .lean()
 
           res.json({
             message:"Data fetched successfully",
@@ -35,8 +36,9 @@ userRouter.get("/user/connection", userAuth , async(req,res)=>{
                 {fromUserId: loggedInUser._id, status:"accepted"},
                 {toUserId:loggedInUser._id, status:"accepted" }
             ]
-        }). populate("fromUserId", ["firstName","lastName"])
-      .populate("toUserId", ["firstName","lastName"]);
+        }). populate("fromUserId", "firstName lastName age gender about skills profileUrl")
+      .populate("toUserId", "firstName lastName age gender about skills profileUrl")
+      .lean();
 
       const data = connectionRequest.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
@@ -61,7 +63,7 @@ userRouter.get("/feed",userAuth,async(req,res)=>{
      const loggedInUser=req.user
 
      const page = parseInt(req.query.page) || 1;
-     let limit = parseInt(req.query.limit) || 10;
+     let limit = parseInt(req.query.limit) || 20;
      limit = limit > 50 ? 50 : limit;
      const skip = (page - 1) * limit;
 
